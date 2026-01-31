@@ -3,6 +3,7 @@ package core
 import (
 	"context"
 	"clawdlocal/config"
+	"time"
 	"github.com/sirupsen/logrus"
 )
 
@@ -12,8 +13,8 @@ type Agent struct {
 	config        *config.Config
 	eventLoop     *EventLoop
 	messageRouter *MessageRouter
-	toolManager   *ToolManager
-	memoryManager *MemoryManager
+	ToolManager   *ToolManager
+	MemoryManager *MemoryManager
 }
 
 // NewAgent creates a new agent instance
@@ -28,7 +29,11 @@ func NewAgent(cfg *config.Config) (*Agent, error) {
 	}
 	
 	// Create memory manager
-	memoryManager, err := NewMemoryManager(cfg.Memory, logger)
+	memoryManager, err := NewMemoryManager(logger, &MemoryConfig{
+		ShortTermCapacity: 1000,
+		LongTermFile:      cfg.Memory.LongTerm.StorageDir + "/long_term.json",
+		CleanupInterval:   5 * time.Minute,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -36,8 +41,8 @@ func NewAgent(cfg *config.Config) (*Agent, error) {
 	return &Agent{
 		logger:        logger,
 		config:        cfg,
-		toolManager:   toolManager,
-		memoryManager: memoryManager,
+		ToolManager:   toolManager,
+		MemoryManager: memoryManager,
 	}, nil
 }
 
@@ -55,7 +60,7 @@ func (a *Agent) Run(ctx context.Context) error {
 	a.registerDefaultHandlers()
 	
 	// Initialize event loop
-	a.eventLoop = NewEventLoop(ctx, a.logger, a.config.Agent.MaxQueueSize, a.toolManager, a.memoryManager)
+	a.eventLoop = NewEventLoop(ctx, a.logger, a.config.Agent.MaxQueueSize)
 	
 	// Start the event loop
 	if err := a.eventLoop.Start(); err != nil {
@@ -73,20 +78,20 @@ func (a *Agent) Run(ctx context.Context) error {
 // registerDefaultHandlers registers built-in message handlers
 func (a *Agent) registerDefaultHandlers() {
 	// Register echo handler
-	a.messageRouter.RegisterHandler(&EchoHandler{}, 50)
+	a.messageRouter.RegisterHandler(&EchoHandler{})
 	
 	// Register test handler  
-	a.messageRouter.RegisterHandler(&TestHandler{}, 100)
+	a.messageRouter.RegisterHandler(&TestHandler{})
 	
 	// Register tool call handler
-	a.messageRouter.RegisterHandler(&ToolCallHandler{
-		toolManager: a.toolManager,
-	}, 200)
+	a.messageRouter.RegisterHandler(&ToolCallMessageHandler{
+		ToolManager: a.ToolManager,
+	})
 	
 	// Register memory handler
-	a.messageRouter.RegisterHandler(&MemoryHandler{
-		memoryManager: a.memoryManager,
-	}, 150)
+	a.messageRouter.RegisterHandler(&MemoryMessageHandler{
+		MemoryManager: a.MemoryManager,
+	})
 }
 
 // Shutdown gracefully stops the agent

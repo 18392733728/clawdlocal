@@ -198,35 +198,37 @@ func (ws *WebServer) getEvents(w http.ResponseWriter, r *http.Request) {
 }
 
 func (ws *WebServer) getShortTermMemory(w http.ResponseWriter, r *http.Request) {
-	if ws.agent.memoryManager == nil {
+	if ws.agent.MemoryManager == nil {
 		http.Error(w, "Memory manager not available", http.StatusInternalServerError)
 		return
 	}
 	
-	memory, err := ws.agent.memoryManager.GetShortTermMemory(r.Context())
+	// Get all short-term memory entries
+	entries, err := ws.agent.MemoryManager.GetAllShortTermMemory(r.Context())
 	if err != nil {
 		ws.logger.WithError(err).Error("Failed to get short-term memory")
 		http.Error(w, "Failed to retrieve memory", http.StatusInternalServerError)
 		return
 	}
 	
-	ws.writeJSON(w, memory, http.StatusOK)
+	ws.writeJSON(w, entries, http.StatusOK)
 }
 
 func (ws *WebServer) getLongTermMemory(w http.ResponseWriter, r *http.Request) {
-	if ws.agent.memoryManager == nil {
+	if ws.agent.MemoryManager == nil {
 		http.Error(w, "Memory manager not available", http.StatusInternalServerError)
 		return
 	}
 	
-	memory, err := ws.agent.memoryManager.GetLongTermMemory(r.Context())
+	// Get all long-term memory entries
+	entries, err := ws.agent.MemoryManager.GetAllLongTermMemory(r.Context())
 	if err != nil {
 		ws.logger.WithError(err).Error("Failed to get long-term memory")
 		http.Error(w, "Failed to retrieve memory", http.StatusInternalServerError)
 		return
 	}
 	
-	ws.writeJSON(w, memory, http.StatusOK)
+	ws.writeJSON(w, entries, http.StatusOK)
 }
 
 type memoryEntryRequest struct {
@@ -242,7 +244,7 @@ func (ws *WebServer) postShortTermMemory(w http.ResponseWriter, r *http.Request)
 		return
 	}
 	
-	if ws.agent.memoryManager == nil {
+	if ws.agent.MemoryManager == nil {
 		http.Error(w, "Memory manager not available", http.StatusInternalServerError)
 		return
 	}
@@ -252,7 +254,7 @@ func (ws *WebServer) postShortTermMemory(w http.ResponseWriter, r *http.Request)
 		ttl = time.Duration(*req.TTL) * time.Second
 	}
 	
-	err := ws.agent.memoryManager.SetShortTermMemory(r.Context(), req.Key, req.Value, ttl)
+	err := ws.agent.MemoryManager.SetShortTermMemory(r.Context(), req.Key, req.Value, ttl)
 	if err != nil {
 		ws.logger.WithError(err).Error("Failed to set short-term memory")
 		http.Error(w, "Failed to store memory", http.StatusInternalServerError)
@@ -269,12 +271,12 @@ func (ws *WebServer) postLongTermMemory(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 	
-	if ws.agent.memoryManager == nil {
+	if ws.agent.MemoryManager == nil {
 		http.Error(w, "Memory manager not available", http.StatusInternalServerError)
 		return
 	}
 	
-	err := ws.agent.memoryManager.SetLongTermMemory(r.Context(), req.Key, req.Value)
+	err := ws.agent.MemoryManager.SetLongTermMemory(r.Context(), req.Key, req.Value)
 	if err != nil {
 		ws.logger.WithError(err).Error("Failed to set long-term memory")
 		http.Error(w, "Failed to store memory", http.StatusInternalServerError)
@@ -291,12 +293,12 @@ type toolResponse struct {
 }
 
 func (ws *WebServer) getTools(w http.ResponseWriter, r *http.Request) {
-	if ws.agent.toolManager == nil {
+	if ws.agent.ToolManager == nil {
 		http.Error(w, "Tool manager not available", http.StatusInternalServerError)
 		return
 	}
 	
-	tools := ws.agent.toolManager.ListTools()
+	tools := ws.agent.ToolManager.ListTools()
 	resp := make([]toolResponse, len(tools))
 	
 	for i, tool := range tools {
@@ -329,12 +331,17 @@ func (ws *WebServer) executeTool(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	
-	if ws.agent.toolManager == nil {
+	if ws.agent.ToolManager == nil {
 		http.Error(w, "Tool manager not available", http.StatusInternalServerError)
 		return
 	}
 	
-	result, err := ws.agent.toolManager.ExecuteTool(r.Context(), toolName, req.Parameters)
+	call := &ToolCall{
+		ID:   generateID(),
+		Name: toolName,
+		Args: req.Parameters,
+	}
+	result, err := ws.agent.ToolManager.ExecuteTool(r.Context(), call)
 	resp := toolExecuteResponse{}
 	
 	if err != nil {
