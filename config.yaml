@@ -1,0 +1,59 @@
+# ClawdLocal Main Configuration
+
+agent:
+  name: "ClawdLocal"
+  version: "0.1.0"
+  description: "Lightweight local AI agent framework"
+  workspace: "./workspace"
+  max_queue_size: 1000
+
+server:
+  host: "0.0.0.0"
+  port: 8080
+
+memory:
+  short_term:
+    enabled: true
+    max_entries: 1000
+    default_ttl: 3600
+  long_term:
+    enabled: true
+    storage_dir: "./memory"
+
+web:
+  enabled: true
+  host: "0.0.0.0"
+  port: 8080
+  static_dir: "./web/static"
+  api_prefix: "/api/v1"
+  cors:
+    enabled: true
+    allowed_origins:
+      - "http://localhost:8080"
+      - "http://127.0.0.1:8080"
+      - "http://0.0.0.0:8080"
+    allowed_methods:
+      - "GET"
+      - "POST"
+      - "PUT"
+      - "DELETE"
+      - "OPTIONS"
+    allowed_headers:
+      - "Content-Type"
+      - "Authorization"
+      - "X-Requested-With"
+  security:
+    rate_limit: true
+    max_requests_per_minute: 100
+    enable_csp: true
+
+plugins:
+  enabled: true
+  paths:
+    - "./plugins"
+  auto_reload: false
+
+logging:
+  level: "info"
+  format: "text"
+  output: "stdout"

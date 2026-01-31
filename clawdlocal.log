@@ -1,0 +1,15 @@
+time="2026-02-01T01:48:31+08:00" level=info msg="Loaded 1 long-term memory entries from ./memory/long_term.json"
+time="2026-02-01T01:48:31+08:00" level=info msg="ClawdLocal agent starting..."
+time="2026-02-01T01:48:31+08:00" level=info msg="Agent: ClawdLocal v0.1.0"
+time="2026-02-01T01:48:31+08:00" level=info msg="Workspace: ./workspace"
+time="2026-02-01T01:48:31+08:00" level=info msg="Server: localhost:8080"
+time="2026-02-01T01:48:31+08:00" level=info msg="Starting web server on localhost:8080"
+time="2026-02-01T01:48:31+08:00" level=info msg="Starting event loop"
+time="2026-02-01T01:48:31+08:00" level=info msg="ClawdLocal agent started successfully!"
+
+Shutting down...
+time="2026-02-01T01:49:09+08:00" level=info msg="Stopping web server"
+time="2026-02-01T01:49:09+08:00" level=info msg="Stopping event loop"
+time="2026-02-01T01:49:09+08:00" level=info msg="Event loop context cancelled"
+time="2026-02-01T01:49:09+08:00" level=info msg="Agent shutdown complete"
+Agent error: context canceled
