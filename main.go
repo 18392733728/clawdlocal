@@ -3,8 +3,11 @@ package main
 import (
 	"clawdlocal/config"
 	"clawdlocal/core"
+	"context"
 	"log"
 	"os"
+	"os/signal"
+	"syscall"
 )
 
 func main() {
@@ -26,5 +29,26 @@ func main() {
 	}
 	
 	log.Println("ClawdLocal agent started successfully!")
-	agent.Run()
+	
+	// Create context with signal handling
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	// Handle shutdown signals
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
+	
+	// Start the agent with context
+	go func() {
+		agent.Run(ctx)
+	}()
+	
+	// Wait for shutdown signal
+	<-sigChan
+	log.Println("Received shutdown signal, stopping agent...")
+	cancel()
+	
+	// Wait for graceful shutdown
+	agent.Shutdown()
+	log.Println("Agent stopped gracefully")
 }

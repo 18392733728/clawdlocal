@@ -1,0 +1,28 @@
+# Tools Configuration
+tools:
+  enabled: true
+  paths:
+    - "./tools"
+  auto_reload: false
+  
+  # Default tool execution settings
+  execution:
+    timeout: 30
+    max_output_size: 10240
+    allow_network: true
+    allow_filesystem: true
+    
+  # Built-in tools configuration
+  built_in:
+    read:
+      enabled: true
+      max_file_size: 1048576  # 1MB
+    write:
+      enabled: true
+      allowed_paths: ["./workspace", "./output"]
+    exec:
+      enabled: true
+      allowed_commands: ["ls", "cat", "pwd", "date", "whoami"]
+    web_search:
+      enabled: true
+      max_results: 5

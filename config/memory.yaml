@@ -1,0 +1,26 @@
+# Memory System Configuration
+memory:
+  # Short-term memory (in-memory cache)
+  short_term:
+    enabled: true
+    max_entries: 1000
+    ttl_seconds: 3600  # 1 hour
+    
+  # Long-term memory (persistent storage)
+  long_term:
+    enabled: true
+    storage_type: "file"  # file, database, redis
+    file_path: "./workspace/memory"
+    auto_backup: true
+    backup_interval_hours: 24
+    
+  # Memory indexing
+  indexing:
+    enabled: true
+    vector_store: "simple"  # simple, faiss, pinecone
+    embedding_model: "default"
+    
+  # Memory compression
+  compression:
+    enabled: false
+    threshold_kb: 1024

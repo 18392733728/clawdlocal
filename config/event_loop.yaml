@@ -1,0 +1,28 @@
+# Event Loop Configuration
+event_loop:
+  # Maximum number of concurrent workers
+  max_workers: 10
+  
+  # Queue size for pending events
+  queue_size: 1000
+  
+  # Timeout for event processing (seconds)
+  processing_timeout: 30
+  
+  # Graceful shutdown timeout (seconds)
+  shutdown_timeout: 10
+
+# Message Handler Configuration
+message_handlers:
+  - name: "example"
+    enabled: true
+    priority: 100
+    patterns:
+      - "test.*"
+      - "example.*"
+  
+  - name: "echo"
+    enabled: true
+    priority: 50
+    patterns:
+      - "echo.*"
