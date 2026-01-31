@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ClawdLocal - 本地AI代理控制面板</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>ClawdLocal 控制面板</h1>
+            <p>本地AI代理框架 v0.1.0</p>
+        </header>
+        
+        <div class="dashboard">
+            <div class="card">
+                <h2>系统状态</h2>
+                <div id="status-info">
+                    <p>正在连接...</p>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h2>事件监控</h2>
+                <div id="events-list">
+                    <p>等待事件...</p>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h2>记忆管理</h2>
+                <div id="memory-info">
+                    <p>加载记忆数据...</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="chat-interface">
+            <h2>交互测试</h2>
+            <div id="chat-messages"></div>
+            <div class="chat-input">
+                <input type="text" id="message-input" placeholder="输入消息...">
+                <button id="send-button">发送</button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="/static/script.js"></script>
+</body>
+</html>

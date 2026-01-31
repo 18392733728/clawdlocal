@@ -9,13 +9,13 @@
 - 错误处理机制
 - 示例处理器实现
 - 完整的测试用例
-- 工具调用系统 (Tool Calling System)
+- **工具调用系统** (Tool Calling System)
+- **记忆系统** (Memory System) - 支持短期和长期记忆
+- **Web界面** (Web Interface) - 提供可视化监控和交互
 
 🔄 **进行中**:
-- Agent与事件循环的完整集成
-- 更多处理器类型的实现
 - 性能优化和监控
-- 记忆系统集成
+- 插件系统
 
 ## 架构概览
 
@@ -29,6 +29,11 @@
 │   Messages  │───▶│ Message     │───▶│ Message     │
 └─────────────┘    │ Router      │    │ Handlers    │
                    └─────────────┘    └─────────────┘
+                         │
+                         ▼
+                  ┌─────────────┐
+                  │ Web Server  │
+                  └─────────────┘
 ```
 
 ## 核心特性
@@ -45,10 +50,30 @@
 - 内置消息队列
 - 类型安全的消息结构
 
-### 3. 配置管理
+### 3. 工具调用系统 (Tool Calling)
+- 动态工具注册和管理
+- 同步/异步工具执行
+- 参数验证和错误处理
+- 可配置的超时和重试策略
+
+### 4. 记忆系统 (Memory System)
+- **短期记忆**: 基于时间窗口的最近事件缓存
+- **长期记忆**: 持久化存储的重要信息
+- 自动记忆清理和过期机制
+- 支持记忆查询和检索
+
+### 5. Web界面 (Web Interface)
+- 实时系统状态监控
+- 事件流可视化
+- 记忆数据查看和管理
+- 交互式测试控制台
+- 响应式设计，支持桌面和移动设备
+
+### 6. 配置管理
 - YAML配置文件支持
 - 环境变量覆盖
 - 默认配置回退
+- 模块化配置（事件循环、工具、记忆、Web等）
 
 ## 快速开始
 
@@ -60,11 +85,14 @@ go mod tidy
 
 ### 2. 运行示例
 ```bash
-# 使用默认配置
+# 使用默认配置（包含所有功能）
 go run main.go
 
 # 使用自定义配置
 go run main.go config/event_loop.yaml
+
+# 启用Web界面
+# 默认配置已包含Web服务器，访问 http://localhost:8080
 ```
 
 ### 3. 创建自定义处理器
@@ -81,23 +109,68 @@ func (h *MyHandler) CanHandle(eventType core.EventType) bool {
 }
 ```
 
+### 4. 注册自定义工具
+```go
+// 在Agent初始化后注册工具
+agent.RegisterTool("my_tool", &MyCustomTool{})
+
+// 工具实现需要实现core.Tool接口
+type MyCustomTool struct{}
+
+func (t *MyCustomTool) Name() string { return "my_tool" }
+func (t *MyCustomTool) Description() string { return "My custom tool description" }
+func (t *MyCustomTool) Execute(ctx context.Context, params map[string]interface{}) (interface{}, error) {
+    // 工具执行逻辑
+    return "result", nil
+}
+```
+
+### 5. 使用记忆系统
+```go
+// 存储到短期记忆
+agent.Memory().StoreShortTerm("user_preference", "dark_mode")
+
+// 存储到长期记忆
+agent.Memory().StoreLongTerm("user_profile", userProfileData)
+
+// 查询记忆
+value, found := agent.Memory().Get("user_preference")
+```
+
 ## 配置选项
 
-查看 `config/default.yaml` 和 `config/event_loop.yaml` 了解可用的配置选项。
+查看以下配置文件了解可用的配置选项：
+- `config/default.yaml` - 基础配置
+- `config/event_loop.yaml` - 事件循环配置
+- `config/tools.yaml` - 工具调用配置  
+- `config/memory.yaml` - 记忆系统配置
+- `config/web.yaml` - Web界面配置
+
+## Web界面功能
+
+启动应用后，访问 `http://localhost:8080` 可以使用Web界面：
+
+- **系统状态**: 查看Agent运行状态、事件队列长度等
+- **事件监控**: 实时显示处理的事件流
+- **记忆管理**: 查看和管理短期/长期记忆数据
+- **交互测试**: 直接在浏览器中发送消息测试Agent响应
 
 ## 测试
 
 ```bash
+# 运行所有测试
 go test ./core/...
+
+# 运行特定模块测试
+go test ./core/ -run TestEventLoop
 ```
 
 ## 下一步开发
 
-1. **工具调用系统**: ✅ 实现完整的工具注册和执行框架
-2. **记忆系统**: ✅ 集成长期和短期记忆存储  
-3. **多Agent支持**: ❌ 不需要实现
-4. **Web界面**: 🔄 提供可视化监控和交互界面
-5. **插件系统**: 支持动态加载和卸载功能模块
+1. **性能优化**: 事件处理性能分析和优化
+2. **插件系统**: 支持动态加载和卸载功能模块
+3. **更多内置工具**: 文件操作、网络请求、数据库访问等
+4. **高级记忆功能**: 语义搜索、记忆关联等
 
 ## 贡献
 
@@ -105,3 +178,4 @@ go test ./core/...
 - 代码格式化 (`go fmt`)
 - 添加相应的测试
 - 更新文档
+- 每完成一个功能模块就推送一次到GitHub
