@@ -15,6 +15,7 @@ type Agent struct {
 	messageRouter *MessageRouter
 	ToolManager   *ToolManager
 	MemoryManager *MemoryManager
+	webServer     *WebServer
 }
 
 // NewAgent creates a new agent instance
@@ -62,6 +63,21 @@ func (a *Agent) Run(ctx context.Context) error {
 	// Initialize event loop
 	a.eventLoop = NewEventLoop(ctx, a.logger, a.config.Agent.MaxQueueSize)
 	
+	// Create and start web server
+	webConfig := &WebConfig{
+		Host: a.config.Server.Host,
+		Port: a.config.Server.Port,
+	}
+	webServer, err := NewWebServer(a, webConfig)
+	if err != nil {
+		return err
+	}
+	a.webServer = webServer
+	
+	if err := a.webServer.Start(ctx); err != nil {
+		return err
+	}
+	
 	// Start the event loop
 	if err := a.eventLoop.Start(); err != nil {
 		return err
@@ -96,6 +112,9 @@ func (a *Agent) registerDefaultHandlers() {
 
 // Shutdown gracefully stops the agent
 func (a *Agent) Shutdown() {
+	if a.webServer != nil {
+		a.webServer.Stop()
+	}
 	if a.eventLoop != nil {
 		a.eventLoop.Stop()
 	}
