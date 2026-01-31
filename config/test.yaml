@@ -1,0 +1,28 @@
+# Test Configuration for ClawdLocal
+agent:
+  name: "ClawdLocal"
+  version: "0.1.0"
+  description: "本地AI代理框架"
+  workspace: "./workspace"
+  max_queue_size: 1000
+
+server:
+  host: "localhost"
+  port: 8080
+
+# Memory configuration
+memory:
+  enabled: true
+  short_term:
+    max_size: 1000
+    default_ttl_seconds: 3600
+  long_term:
+    storage_path: "./memory"
+    auto_save_interval_seconds: 300
+
+# Web interface configuration  
+web:
+  enabled: true
+  host: "localhost"
+  port: 8080
+  static_dir: "./web/static"

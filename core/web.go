@@ -347,4 +347,27 @@ func (ws *WebServer) executeTool(w http.ResponseWriter, r *http.Request) {
 	ws.writeJSON(w, resp, http.StatusOK)
 }
 
-func (ws *WebServer) healthCheck(w http.ResponseWriter, r *http.Rout
+func (ws *WebServer) healthCheck(w http.ResponseWriter, r *http.Request) {
+	resp := map[string]interface{}{
+		"status": "healthy",
+		"uptime": time.Now(),
+		"version": ws.agent.config.Agent.Version,
+	}
+	ws.writeJSON(w, resp, http.StatusOK)
+}
+
+func (ws *WebServer) serveIndex(w http.ResponseWriter, r *http.Request) {
+	http.ServeFile(w, r, "./web/static/index.html")
+}
+
+func (ws *WebServer) writeJSON(w http.ResponseWriter, data interface{}, statusCode int) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(statusCode)
+	if err := json.NewEncoder(w).Encode(data); err != nil {
+		ws.logger.WithError(err).Error("Failed to write JSON response")
+	}
+}
+
+func generateID() string {
+	return fmt.Sprintf("%d", time.Now().UnixNano())
+}

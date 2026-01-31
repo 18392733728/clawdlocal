@@ -13,6 +13,7 @@ type Agent struct {
 	eventLoop     *EventLoop
 	messageRouter *MessageRouter
 	toolManager   *ToolManager
+	memoryManager *MemoryManager
 }
 
 // NewAgent creates a new agent instance
@@ -20,18 +21,23 @@ func NewAgent(cfg *config.Config) (*Agent, error) {
 	// Setup logger based on config
 	logger := logrus.New()
 	
-	// TODO: Implement logging configuration from cfg
-	
 	// Create tool manager
 	toolManager, err := NewToolManager(logger)
 	if err != nil {
 		return nil, err
 	}
 	
+	// Create memory manager
+	memoryManager, err := NewMemoryManager(cfg.Memory, logger)
+	if err != nil {
+		return nil, err
+	}
+	
 	return &Agent{
-		logger:      logger,
-		config:      cfg,
-		toolManager: toolManager,
+		logger:        logger,
+		config:        cfg,
+		toolManager:   toolManager,
+		memoryManager: memoryManager,
 	}, nil
 }
 
@@ -49,7 +55,7 @@ func (a *Agent) Run(ctx context.Context) error {
 	a.registerDefaultHandlers()
 	
 	// Initialize event loop
-	a.eventLoop = NewEventLoop(ctx, a.logger, a.config.Agent.MaxQueueSize, a.toolManager)
+	a.eventLoop = NewEventLoop(ctx, a.logger, a.config.Agent.MaxQueueSize, a.toolManager, a.memoryManager)
 	
 	// Start the event loop
 	if err := a.eventLoop.Start(); err != nil {
@@ -76,6 +82,11 @@ func (a *Agent) registerDefaultHandlers() {
 	a.messageRouter.RegisterHandler(&ToolCallHandler{
 		toolManager: a.toolManager,
 	}, 200)
+	
+	// Register memory handler
+	a.messageRouter.RegisterHandler(&MemoryHandler{
+		memoryManager: a.memoryManager,
+	}, 150)
 }
 
 // Shutdown gracefully stops the agent

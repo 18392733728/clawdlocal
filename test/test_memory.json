@@ -1,0 +1,17 @@
+{
+  "long_term": {
+    "long_key": {
+      "key": "long_key",
+      "value": "long_value",
+      "timestamp": "2026-02-01T00:46:09.911417702+08:00"
+    }
+  },
+  "short_term": {
+    "test_key": {
+      "key": "test_key",
+      "value": "test_value",
+      "timestamp": "2026-02-01T00:46:09.911410185+08:00",
+      "ttl": 10000000000
+    }
+  }
+}
