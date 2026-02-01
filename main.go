@@ -9,6 +9,7 @@ import (
 
 	"clawdlocal/config"
 	"clawdlocal/core"
+	"clawdlocal/tools"
 )
 
 func main() {
@@ -25,6 +26,9 @@ func main() {
 		fmt.Printf("Failed to create agent: %v\n", err)
 		os.Exit(1)
 	}
+
+	// Register built-in tools
+	tools.RegisterAllTools(agent)
 
 	// Create context with cancellation
 	ctx, cancel := context.WithCancel(context.Background())
